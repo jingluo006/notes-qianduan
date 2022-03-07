@@ -1283,6 +1283,83 @@ put 和 delete 请求类似。
 
 
 
+### 3、借助脚手架解决ajax请求跨域问题(尚硅谷p96)
+
+**请求的几个常见方法：**
+
+1. xhr  ：  new XMLHttpRequest()    xhr.open()   xhr.send() 等方法
+2. jQuery：$.ajax({})   $.get  $.post
+3. <font color='red'>axios</font>: 使用最多，最推荐
+4. fetch：它和xhr 平级，原生就有，window下就有挂载，也是返回promise，但包了两层promise，得调两个.then 拿数据。最致命的是他有兼容性问题，IE不兼容
+
+
+
+看到报错信息有<font color='red'>CORS</font> 就知道是跨域问题，跨域请求客户端能发出去，服务器端也能收到，但服务器端不会返回数据。
+
+**解决方案：**
+
+1、<font color='red'>cors</font>：客户端不用干嘛，让<font color='cornflowerblue'>服务器</font>端在<font color='cornflowerblue'>返回响应的时候加几个响应头</font>。
+
+2、<font color='cornflowerblue'>jsonp</font>：利用script src，运用很巧妙，需要前后端人员配合，只能解决get请求，**实际开发基本不会使用**，但面试喜欢问。
+
+3、<font color='red'>配置一个代理服务器</font>：开发中运用比较多
+
+```js
+比如客户端是http//localhost:8080 则配置一个http//localhost:8080的服务器，通过8080服务器和其他服务器进行数据传输，服务器与服务器之间不用ajax，不存在同源政策。
+1、nginx方法：这是一个经典的方法，但需要对后端知识有所了解。
+2、vue-cli：借助它来开启。去vuejs 找到vue-cli 查看配置参考。（devServer.proxy）
+  在vue.config.js 中配置：
+  devServer: {
+    proxy: 'http://localhost:4000'
+  }
+  //代理服务器的地址和我们客户端地址会默认保持一致，不用我们管，上面这个端口号写我们要拿数据的那   个服务器的端口号，这个配置只能写到端口号，不能往后写。
+
+  // 最后我们请求的时候端口及之前的地址要写代理服务器，也就是和客户端一致，端口号后面的和要请求服务器一致
+```
+
+<font color='red'>注意点：</font>
+
+1. 代理服务器8080<font color='cornflowerblue'>不会把所有请求都发给服务器</font>，当客户端要请求的<font color='cornflowerblue'>数据它有的时候</font>（也就是<font color='cornflowerblue'>public</font>文件夹下有的都算是8080的）。
+
+2. <font color='cornflowerblue'>只能配置一个代理，不能配置多个</font>
+
+   
+
+<font size=4><font color='red'>配置代理的方式二：</font></font>（p97）
+
+```js
+1、参考vuejs 中的 vue cli
+在vue.config.js 中配置：
+devServer: {
+    proxy: {
+      '/api': {      
+        target: 'http://localhost:4000',
+        pathRewrite:{ '^/api':''}
+        ws: true,    //用于支持websocket
+        changeOrigin: true  //用于控制请求头中的host值
+      },
+      '/foo': {
+        target: 'http://localhost:4001'  //配置多个代理
+        pathRewrite:{ '^/foo':''}
+      }
+    }
+  }
+注：
+1、'/api' 表示客户端以/api 开头的请求地址 代理服务器才会去向服务器端发送请求。以/api 开头是指   端口号后面: localhost:8080/api/students
+
+2、pathRewrite 官方配置里没有，但必须写，不然代理服务器向服务器请求时地址会带上/api，这个对象的   第一个属性是一个正则表达式，值为空，表示把/api 改为 ''
+
+3、记住在组件中请求的时候地址前面的部分写代理服务器的
+```
+
+
+
+
+
+
+
+
+
 ## 四、vue-cli
 
 ### **1.** **什么是单页面应用程序**
@@ -1606,6 +1683,30 @@ vue 规定：组件中封装的自定义属性是<font color='red'>只读的</fo
 
 
 
+### 8、mixin (尚硅谷p67)
+
+功能：可以把多个组件共用的配置提取成一个混入对象
+
+```js
+使用方式：
+第一步：定义混合（在src 下创建mixin.js）
+(script 中的所有节点都可以定义在里面)
+export const mixin = {
+    methods: {
+        .....
+    }
+}
+第二步：使用混合
+（1）全局混入：Vue.mixin()   //在main.js中导入然后使用。
+（2）局部混入：mixin:['xxx']  //哪个组件要用就在哪导入，使用数组的方式
+```
+
+
+
+
+
+
+
 # Day04 生命周期&数据共享(p105)
 
 ## 一、组件的生命周期
@@ -1793,9 +1894,7 @@ this.inputCisible = true 刚执行完处于生命周期的beforeUpdate 节点，
 
 ### 6. this.$nextTick(cb) 方法
 
-组件的 <font color='red'>$nextTick(cb)</font> 方法，会把 cb 回调<font color='red'>推迟到下一个 DOM 更新周期之后执行</font>。通俗的理解是：等组件的
-
-DOM 更新完成之后，再执行 cb 回调函数。从而能保证 cb 回调函数可以操作到最新的 DOM 元素。
+组件的 <font color='red'>$nextTick(cb)</font> 方法，会把 cb 回调<font color='red'>推迟到下一个 DOM 更新周期之后执行</font>。通俗的理解是：**等组件的DOM节点 更新完成之后，再执行 cb 回调函数**。从而能保证 cb 回调函数可以操作到最新的 DOM 元素。
 
 ![90](img/90.PNG)
 
@@ -2568,7 +2667,108 @@ vue-router 提供了许多编程式导航的 API，其中最常用的导航 API 
 
 
 
-# day07 综合案例(p205)
+
+
+# Day07 过渡与动画（sgg p90）
+
+## 1、借助css3动画效果完成
+
+```js
+//哪些元素要加动画效果就用transition 包裹，:appear="true" 简写成appear 表示页面一上来就展示动画。 transition 元素最后不会在页面中展示。
+<transition name="hello" appear>
+    <h2 v-show="isshow">App2组件</h2>
+</transition>
+
+<style scoped>
+.hello-enter-active {            //动画进入的过程
+  animation: animate 1s linear;
+}
+.hello-leave-active {            //动画离开的过程
+  animation: animate 1s linear reverse;
+}
+
+@keyframes animate {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+</style>
+```
+
+
+
+## 2、使用过渡来完成
+
+```js
+//template 结构与上面一致
+
+<style scoped>
+// 进入的起点、离开的终点
+.hello-enter,
+.hello-leave-to {
+  transform: translateX(-100%);
+}
+
+.hello-enter-active,
+.hello-leave-active {
+  transition: 0.5s linear;    //这个动画的展示也可以加到对应标签的样式上面
+}
+
+//进入的终点，离开的起点
+.hello-enter-to,
+.hello-leave {
+  transform: translateX(0);
+}
+<style>
+```
+
+
+
+## 3、多元素过渡
+
+```js
+//使用transiton-group, 要过渡的元素必须有唯一的key
+<transition-group name="hello" appear>
+  <h2 v-show="isshow" key="1">App2组件</h2>
+  <h2 v-show="isshow" key="2">前端</h2>
+</transition-group>
+```
+
+
+
+## 4、第三方集成动画
+
+<font color='red'>npm 下有一个 animate.css</font> (进入之后右边的animate.style/)
+
+```js
+1、先下载  npm install animate.css
+2、引入：import 'animate.css'
+3、使用：
+<transition 
+	appear
+	name="animate__animated animate__bounce"
+	enter-active-class=""
+	leave-active-class=""
+    >
+    <h2 v-show="isshow">App2组件</h2>
+</transition>
+
+// name一定要配置好
+// 进入和离开的类名在里面找到想要的动画复制下来即可
+```
+
+
+
+
+
+
+
+
+
+# Day08 综合案例(p205)
 
 <font size=5>黑马头条移动端文档：doc.toutiao.liulongbin.top</font>
 
@@ -2650,7 +2850,345 @@ vue-router 提供了许多编程式导航的 API，其中最常用的导航 API 
     theme.js 模板主题放src 目录下
     ```
 
+
+
+
+# Vuex (尚硅谷p105)
+
+## 1、**理解 vuex**
+
+### **1.1 vuex 是什么**
+
+1. 概念：专门在 Vue 中实现<font color='red'>集中式状态（数据）管理</font>的一个 Vue 插件，对 vue 应 
+
+用中<font color='red'>多个组件的共享状态</font>进行<font color='red'>集中式的管理</font>（读/写），也是一种组件间通信的方 
+
+式，且适用于任意组件间通信。
+
+2. Github 地址: https://github.com/vuejs/vuex
+
+
+
+### **1.2 什么时候使用 Vuex**
+
+1. **多个组件依赖于同一状态 **
+
+2. **来自不同组件的行为需要变更同一状态 **
+
+   总结就是一个词：共享
+
+
+
+### **1.4 Vuex 工作原理图**
+
+![](img/vuex.png)
+
+```js
+Actions: 行动    Mutations：转变，突变，加工   State：状态
+dispatch: 分发   Backend API：后端接口
+```
+
+1. <font color='red'>State、Actions、Mutations 本质</font>是一个<font color='red'>对象</font>，里面存了很多数据。他们三个由一个人领导：**store**，意为仓库。
+2. <font color='red'>dispatch</font> 是一个<font color='red'>API</font>
+
+
+
+## 2、Vuex环境搭建
+
+第一步：
+
+```js
+1. npm install vuex@3    //vue2使用vuex3版本，vue3使用vuex4版本，所以下载的时候一定要							指定版本号
+```
+
+第二步：
+
+```js
+2. 在src 下创建 store/index.js 或者创建 vuex/store.js 官方给的是前者。
+// 在index.js 中
+import Vue from 'vue'
+import Vuex from 'vuex'
+Vue.use(Vuex)    // 这里不能写在main.js 中，否则在执行的时候会先执行下面的new，在use 					Vuex
+
+const actions = {}       //用于响应组件的动作
+const mutations = {}     //用于操作数据（state）
+const state = {}         //用于存储数据  
+
+//创建并暴露store
+export default new Vuex.Store({
+    actions,
+    mutations,
+    state
+})
+```
+
+第三步：
+
+```js
+在main.js 中
+import store from '@/store/index.js'
+在vm 中添加store
+```
+
+
+
+## 3、Vuex的基本使用
+
+实现加、减、奇数加、延迟加
+
+组件部分：
+
+```vue
+<script>
+export default {
+  data() {
+    return {
+      n: 1
+    }
+  },
+  methods: {
+    // 如果不涉及逻辑，要传递的数据是确定的，则可以跳过Actions，直接commit到Mutations
+    increment() {
+      this.$store.commit('JIA', this.n)
+    },
+    decrement() {
+      this.$store.commit('JIAN', this.n)
+    },
+    //涉及逻辑和ajax请求等得先dispatch 到Actions
+    incrementOdd() {
+      this.$store.dispatch('jiaOdd', this.n)
+    },
+    incrementWait() {
+      this.$store.dispatch('jiaWait', this.n)
+    }
+  }
+}
+</script>
+```
+
+store/index.js 部分：
+
+```js
+export default new Vuex.Store({
+  state: {
+    sum: 0
+  },
+  mutations: {
+    JIA(state, value) {
+      state.sum += value
+    },
+    JIAN(state, value) {
+      state.sum -= value
+    }
+  },
+  actions: {
+    //context 为上下文，里面包含了dispatch，state，commit等  
+    jiaOdd(context, value) {         //如果只需要commit，可解构赋值 { commit }
+      if (context.state.sum % 2) {
+        context.commit('jia', value)
+      }
+    },
+    jiaWait(context, value) {
+      setTimeout(() => {
+        context.commit('JIA', value)
+      }, 500)
+    }
+  },
+  modules: {}
+})
+```
+
+
+
+## 4、getters的基本使用
+
+1. 概念：当state 中的数据<font color='red'>需要加工后再使用时</font>，可以使用getters 加工（类似于computed）(这个不是必选项，并非一定要用，逻辑复杂且需要复用，推荐这么写)
+
+2. 在 store/index.js 中配置
+
+   ```js
+   const getters = {
+       bigSum(state) {
+           return state.sum * 10
+       }
+   }
+   最后将他暴露出去
+   ```
+
+   3. 组件中<font color='red'>读取数据</font>：`$store.getters.bigSum`
+
+
+
+## 5、mapState、mapGetters、mapActions、mapMutations
+
+为了简化模板，通过计算属性从vuex 中取值
+
+1. <font color='red'>mapState方法</font>：用于帮助我们**映射state 中的数据为计算属性**
+
+```js
+computed() {
+	//借助mapState 生成计算属性：sum，school，subject（对象写法）
+	...mapState({sum:'sum', school:'school',subject:'subject'})
+    //如果属性名和state 中的数据名一致，则可以采取简写形式（数组写法）
+    ...mapState(['sum','school','subject'])
     
+    //上面生成的结果就是我们手写的计算属性:
+    sum() { return $store.state.sum}
+    ......
+}
+注：不管是对象还是数组里state中数据的名字都必须加引号 '' 不然会被当成变量去查找
+    mapState中前面的...是扩展运算符,因为他本身生成的是一个对象，所以要拆解出来。
+```
+
+
+
+2. <font color='red'>mapGetters方法</font>：用于帮助我们**映射getters中的数据为计算属性**
+
+```js
+computed() {
+	//借助mapGetters 生成计算属性：sum，school，subject（对象写法）
+	...mapGetters({bigSum:'bigSum'})
+    //如果属性名和getters 中的名一致，则可以采取简写形式（数组写法）
+    ...mapGetters(['bigSum'])
+    
+    //上面生成的结果就是我们手写的计算属性:
+    bigSum() { return $store.getters.bigSum}
+    ......
+}
+```
+
+
+
+3. <font color='red'>mapActions方法</font>：**方法会调用dispatch 去联系Actions**
+
+```js
+methods: {
+    //对象写法
+    ...mapActions({incrementOdd:'jiaOdd', incrementWait:'jiaWait'})
+    //数组简写(方法名和vuex中的actions中的方法名一致时)
+    ...mapActions(['jiaOdd','jiaWait'])
+    
+    //相对于我们自己手写的：
+    incrementOdd(value) {
+        this.$store.dispatch('jiaOdd',value)  //这里的value需要我们调用这方法是传参过来，否则就是默认事件e
+    }
+    //incrementWait一样
+}
+```
+
+
+
+4. <font color='red'>mapMutations方法</font>：**方法会调用commit 去联系MUtations**
+
+```js
+methods: {
+    //对象写法
+    ...mapMutations({increment:'JIA', increment:'JIAN'})
+    //数组简写(方法名和vuex中的actions中的方法名一致时)
+    ...mapMutations(['JIA','JIAN'])
+    
+    //相对于我们自己手写的：
+    increment(value) {
+        this.$store.commit('JIA',value)  //这里的value需要我们调用这方法是传参过来，否则就是默认事件e
+    }
+    //increment一样
+}
+```
+
+
+
+## 6、vuex模块化（p115）
+
+store/index.js下：
+
+```js
+//count相关的：
+const countOPtion = {
+    namespaced: true,   //如果组件中要用mapState等方法生成代码，就要加这个属性，加上之后							mapState才能认识下面导出的分类名
+    actions: {  
+    jiaOdd(context, value) {         //如果只需要commit，可解构赋值 { commit }
+      if (context.state.sum % 2) {
+        context.commit('jia', value)
+      }
+    },
+    jiaWait(context, value) {
+      setTimeout(() => {
+        context.commit('JIA', value)
+      }, 500)
+    }
+    },
+    mutations: {
+       JIA(state, value) {
+      	  state.sum += value
+       },
+       JIAN(state, value) {
+      	  state.sum -= value
+       }
+    },
+    state: {
+        sum: 0,
+        school: '尚硅谷'，
+        subject：'前端'
+    },
+    getters: {
+      bigSum(state) {
+        return state.sum * 10
+      }
+    }
+}
+//person相关
+const personOption = {
+    namespaced: true,
+    actions: {},
+    mutations: {},
+    state: {
+        person: {name: 'zs'}
+    },
+    getters: {}       //人员相关的配置就写在这里
+}
+
+//最后导出部分
+modules: {
+    countAbout: countOPtion,
+    personAbout: personOption
+}
+
+```
+
+<font color='red'>这样，就是store 包含countAbout 和personAbout ，这两个下面再包含actions，mtations等</font>
+
+
+
+组价部分:
+
+```js
+computed: {
+    ...mapState('countAbout', ['sum','school','subject']) //括号里的第一个就是指定哪                                                            个模块
+    ...mapState('personAbout',['person'])
+},
+
+methods: {
+    ...mapMutations('countAbout',{increment: 'JIA'})  // 同理，这里也要指定
+}    
+
+// 如果不借助map...
+取数据：
+this.$store.state.countAbout.sum
+this.$store.state.personAbout.personList
+
+取getters:
+this.$store.getters['countAbout/bigSum']
+
+调方法
+this.$store.commit('countAbout/JIA', this.n)
+this.$store.dispatch('countAbout/jiaOdd', this.n)
+```
+
+
+
+
+
+
 
 # VScode setting.json
 
