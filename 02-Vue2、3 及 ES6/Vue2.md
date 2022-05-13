@@ -931,7 +931,7 @@ vue 提供了<font color='red'> v-model 双向数据绑定</font>指令，用来
 
 #### **1.5 条件渲染指令**
 
-<font color='red'>条件渲染指令</font>font>用来辅助开发者<font color='red'>按需控制 DOM 的显示与隐藏。</font>条件渲染指令有如下两个，分别是：
+<font color='red'>条件渲染指令</font>用来辅助开发者<font color='red'>按需控制 DOM 的显示与隐藏。</font>条件渲染指令有如下两个，分别是：
 
 > v-if
 
@@ -1312,7 +1312,7 @@ put 和 delete 请求类似。
   devServer: {
     proxy: 'http://localhost:4000'
   }
-  //代理服务器的地址和我们客户端地址会默认保持一致，不用我们管，上面这个端口号写我们要拿数据的那   个服务器的端口号，这个配置只能写到端口号，不能往后写。
+  //代理服务器的地址和我们客户端地址会默认保持一致，不用我们管，上面这个端口号写我们要拿数据的那个服务器的端口号，这个配置只能写到端口号，不能往后写。
 
   // 最后我们请求的时候端口及之前的地址要写代理服务器，也就是和客户端一致，端口号后面的和要请求服务器一致
 ```
@@ -1590,7 +1590,7 @@ export default {
 
 <font color='red'>注：</font>
 
-1. A 组件是封装这，B 组件是使用者
+1. A 组件是封装者，B 组件是使用者
 2. B 组件中直接写 init="9" , 这个9 是<font color='red'>字符串</font>， 我们可以用<font color='red'>v-bind </font>绑定属性， :init="9"  这时，v-bind绑定后面写的是js语法，是<font color='red'>数字类型</font>的9.
 3. <font color='red'>props </font>中的数据和<font color='red'>data </font>数据<font color='red'>一样</font>，在模板中渲染使用。但<font color='red'>props 的值是只读的，不可写，data是可读可写</font>
 
@@ -2240,11 +2240,11 @@ bind 函数<font color='red'>只调用 1 次</font>：当指令<font color='red'
    import axios from 'axios'
    
    const 小axios1 = axios.create({
-       basrURL = 'www.taobao.com'
+       baseURL:'www.taobao.com'
    })
    
    const 小axios2 = axios.create({
-       baseURL = 'www.jd.com'
+       baseURL: 'www.jd.com'
    })
    
    export default 小axios1    //如果要导出小axios2 要封装另一个request 模块，这里只是演示可以                                create 方法可以调用多次
@@ -2671,6 +2671,13 @@ vue-router 提供了许多编程式导航的 API，其中最常用的导航 API 
 
 # Day07 过渡与动画（sgg p90）
 
+Vue 提供了 `transition` 的封装组件，在<font color='red'>下列情形中</font>，可以给任何元素和组件添加进入/离开过渡
+
+- 条件渲染 (使用 `v-if`)
+- 条件展示 (使用 `v-show`)
+- 动态组件
+- 组件根节点
+
 ## 1、借助css3动画效果完成
 
 ```js
@@ -2908,7 +2915,7 @@ dispatch: 分发   Backend API：后端接口
 // 在index.js 中
 import Vue from 'vue'
 import Vuex from 'vuex'
-Vue.use(Vuex)    // 这里不能写在main.js 中，否则在执行的时候会先执行下面的new，在use 					Vuex
+Vue.use(Vuex)    // 这里不能写在main.js 中，否则在执行的时候会先执行下面的new，再use Vuex
 
 const actions = {}       //用于响应组件的动作
 const mutations = {}     //用于操作数据（state）
@@ -2985,7 +2992,7 @@ export default new Vuex.Store({
     //context 为上下文，里面包含了dispatch，state，commit等  
     jiaOdd(context, value) {         //如果只需要commit，可解构赋值 { commit }
       if (context.state.sum % 2) {
-        context.commit('jia', value)
+        context.commit('JIA', value)
       }
     },
     jiaWait(context, value) {
@@ -3159,7 +3166,7 @@ modules: {
 
 
 
-组价部分:
+组件部分:
 
 ```js
 computed: {

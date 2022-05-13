@@ -772,7 +772,7 @@ jsonp是绕过ajax请求，而CORS不是
 
 ``` javascript
 origin: http://localhost:3000
-//origin是客户端自己的协力，域名和端口
+//origin是客户端自己的协议，域名和端口
 ```
 
 ``` javascript
