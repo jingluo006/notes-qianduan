@@ -161,7 +161,7 @@ npm run dev
     ```js
     // 解决方案
     // person 是data 中的对象数据
-    this.$set(this.persom, 'name', 'zs')
+    this.$set(this.person, 'name', 'zs')
     //或者  Vue.set(this.person, 'name', 'zs')
     
     // 删除数据用另一个方法
